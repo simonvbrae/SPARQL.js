@@ -73,7 +73,7 @@ Generator.prototype.toQuery = function (q) {
   // stringify prefixes at the end to mark used ones
   query = this.baseAndPrefixes(q) + query;
   return query.trim();
-}
+};
 
 Generator.prototype.baseAndPrefixes = function (q) {
   var base = q.base ? ('BASE <' + q.base + '>\n') : '';
@@ -83,7 +83,7 @@ Generator.prototype.baseAndPrefixes = function (q) {
       prefixes += 'PREFIX ' + key + ': <' + q.prefixes[key] + '>\n';
   }
   return base + prefixes;
-}
+};
 
 // Converts the parsed SPARQL pattern into a SPARQL pattern
 Generator.prototype.toPattern = function (pattern) {
@@ -92,7 +92,7 @@ Generator.prototype.toPattern = function (pattern) {
   if (!(type in this))
     throw new Error('Unknown entry type: ' + type);
   return this[type](pattern);
-}
+};
 
 Generator.prototype.triple = function (t) {
   return this.toEntity(t.subject) + ' ' + this.toEntity(t.predicate) + ' ' + this.toEntity(t.object) + '.';
@@ -117,7 +117,7 @@ Generator.prototype.group = function (group, inline) {
 };
 
 Generator.prototype.query = function (query) {
-  return '{\n' + indent(this.toQuery(query)) + '\n}';
+  return this.toQuery(query);
 };
 
 Generator.prototype.filter = function (filter) {
@@ -212,7 +212,7 @@ Generator.prototype.toExpression = function (expr) {
     default:
       throw new Error('Unknown expression type: ' + expr.type);
   }
-}
+};
 
 // Converts the parsed entity (or property path) into a SPARQL entity
 Generator.prototype.toEntity = function (value) {
@@ -260,7 +260,7 @@ Generator.prototype.toEntity = function (value) {
       return '(' + items.join(path) + ')';
     }
   }
-}
+};
 var escape = /["\\\t\n\r\b\f]/g,
     escapeReplacer = function (c) { return escapeReplacements[c]; },
     escapeReplacements = { '\\': '\\\\', '"': '\\"', '\t': '\\t',
@@ -275,7 +275,7 @@ Generator.prototype.encodeIRI = function (iri) {
     return prefix + ':' + prefixMatch[2];
   }
   return '<' + iri + '>';
-}
+};
 
 // Converts the parsed update object into a SPARQL update clause
 Generator.prototype.toUpdate = function (update) {
@@ -302,7 +302,7 @@ Generator.prototype.toUpdate = function (update) {
   default:
     throw new Error('Unknown update query type: ' + update.type);
   }
-}
+};
 
 // Checks whether the object is a string
 function isString(object) { return typeof object === 'string'; }
@@ -535,7 +535,7 @@ break;
 case 38:
 this.$ = undefined;
 break;
-case 39: case 62: case 82: case 105: case 149:
+case 39: case 82: case 105: case 149:
 this.$ = $$[$0-1];
 break;
 case 40:
@@ -595,12 +595,11 @@ break;
 case 61: case 66:
 this.$ = { type: 'bgp', triples: unionAll($$[$0-2], [$$[$0-1]]) };
 break;
+case 62:
+this.$ = { type: 'group', patterns: [ $$[$0-1] ] };
+break;
 case 63:
-
-      if (Parser.options.collapseGroups && $$[$0-1].length > 1)
-        $$[$0-1] = mergeAdjacentBGPs($$[$0-1]);
-      this.$ = { type: 'group', patterns: $$[$0-1] }
-    
+this.$ = { type: 'group', patterns: $$[$0-1] };
 break;
 case 64:
 this.$ = $$[$0-1] ? unionAll([$$[$0-1]], $$[$0]) : unionAll($$[$0]);
@@ -613,7 +612,7 @@ case 67:
       if ($$[$0-1].length)
         this.$ = { type: 'union', patterns: unionAll($$[$0-1].map(degroupSingle), [degroupSingle($$[$0])]) };
       else
-        this.$ = Parser.options.collapseGroups ? degroupSingle($$[$0]) : $$[$0];
+        this.$ = $$[$0];
     
 break;
 case 68:
@@ -1861,11 +1860,8 @@ module.exports = {
    * Creates a SPARQL parser with the given pre-defined prefixes and base IRI
    * @param prefixes { [prefix: string]: string }
    * @param baseIRI string
-   * @param options {
-   *   collapseGroups: boolean // default: true
-   * }
    */
-  Parser: function (prefixes, baseIRI, options) {
+  Parser: function (prefixes, baseIRI) {
     // Create a copy of the prefixes
     var prefixesCopy = {};
     for (var prefix in prefixes || {})
@@ -1877,7 +1873,6 @@ module.exports = {
     parser.parse = function () {
       Parser.base = baseIRI || '';
       Parser.prefixes = Object.create(prefixesCopy);
-      Parser.options  = Object.assign({ collapseGroups: true }, options);
       return Parser.prototype.parse.apply(parser, arguments);
     };
     parser._resetBlanks = Parser._resetBlanks;
