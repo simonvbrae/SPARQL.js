@@ -314,7 +314,7 @@
     return stack;
 }
 
-  function allowsRdfStar(value) {
+  function allowsSparqlStar(value) {
     if (!Parser.sparqlStar) {
       throw new Error('SPARQL* support is not enabled');
     }
@@ -833,10 +833,10 @@ GraphNodePath
     | TriplesNodePath
     ;
 VarTriple
-    : '<<' (VarTriple | VarOrTerm) Verb (VarTriple | VarOrTerm) '>>' -> allowsRdfStar(Parser.factory.quad($2, $3, $4))
+    : '<<' (VarTriple | VarOrTerm) Verb (VarTriple | VarOrTerm) '>>' -> allowsSparqlStar(Parser.factory.quad($2, $3, $4))
     ;
 ConstTriple
-    : '<<' (ConstTriple | Term) Verb (ConstTriple | Term) '>>' -> allowsRdfStar(Parser.factory.quad($2, $3, $4))
+    : '<<' (ConstTriple | Term) Verb (ConstTriple | Term) '>>' -> allowsSparqlStar(Parser.factory.quad($2, $3, $4))
     ;
 VarOrTerm
     : VAR -> toVar($1)
