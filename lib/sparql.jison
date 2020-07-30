@@ -339,7 +339,7 @@
 
   // Helper function to find duplicates in array
   function getDuplicatesInArray(array) {
-    const sortedArray = array.slice().sort(); 
+    const sortedArray = array.slice().sort();
     const duplicates = [];
     for (let i = 0; i < sortedArray.length - 1; i++) {
       if (sortedArray[i + 1] == sortedArray[i]) {
@@ -907,10 +907,12 @@ GraphNodePath
     | TriplesNodePath
     ;
 VarTriple
-    : '<<' (VarTriple | VarOrTerm) Verb (VarTriple | VarOrTerm) '>>' -> allowsSparqlStar(Parser.factory.quad($2, $3, $4))
+    : '<<' 'GRAPH' (VAR | iri) '{' (VarTriple | VarOrTerm) Verb (VarTriple | VarOrTerm) '}' '>>' -> allowsSparqlStar(Parser.factory.quad($5, $6, $7, toVar($3)))
+    | '<<' (VarTriple | VarOrTerm) Verb (VarTriple | VarOrTerm) '>>' -> allowsSparqlStar(Parser.factory.quad($2, $3, $4))
     ;
 ConstTriple
-    : '<<' (ConstTriple | Term) Verb (ConstTriple | Term) '>>' -> allowsSparqlStar(Parser.factory.quad($2, $3, $4))
+    : '<<' 'GRAPH' (VAR | iri) '{' (ConstTriple | Term) Verb (ConstTriple | Term) '}' '>>' -> allowsSparqlStar(Parser.factory.quad($5, $6, $7, toVar($3)))
+    | '<<' (ConstTriple | Term) Verb (ConstTriple | Term) '>>' -> allowsSparqlStar(Parser.factory.quad($2, $3, $4))
     ;
 VarOrTerm
     : VAR -> toVar($1)
